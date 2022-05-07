@@ -77,14 +77,14 @@ namespace Marketplace.Domain
                 (State switch
                 {
                     ClassifiedAdState.PendingReview =>
-                        Title != null
-                        && Text != null
+                        Title is not null
+                        && Text is not null
                         && Price?.Amount > 0,
                     ClassifiedAdState.Active =>
-                        Title != null
-                        && Text != null
+                        Title is not null
+                        && Text is not null
                         && Price?.Amount > 0
-                        && ApprovedBy != null,
+                        && ApprovedBy is not null,
                     _ => true
                 });
 

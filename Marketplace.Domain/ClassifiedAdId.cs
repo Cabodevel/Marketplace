@@ -1,11 +1,8 @@
-﻿using System;
-
-namespace Marketplace.Domain
+﻿namespace Marketplace.Domain
 {
     public class ClassifiedAdId : IEquatable<ClassifiedAdId>
     {
         private Guid Value { get; }
-
         public ClassifiedAdId(Guid value)
         {
             if (value == default)
@@ -13,11 +10,9 @@ namespace Marketplace.Domain
 
             Value = value;
         }
-
         public static implicit operator Guid(ClassifiedAdId self) => self.Value;
-
-        public static implicit operator ClassifiedAdId(string value)
-            => new ClassifiedAdId(Guid.Parse(value));
+        public static explicit operator ClassifiedAdId(Guid value) => new ClassifiedAdId(value);
+        public static implicit operator ClassifiedAdId(string value) => new ClassifiedAdId(Guid.Parse(value));
 
         public override string ToString() => Value.ToString();
 
