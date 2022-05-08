@@ -1,4 +1,4 @@
-﻿using System;
+﻿ using System;
 using Marketplace.Domain;
 using Xunit;
 

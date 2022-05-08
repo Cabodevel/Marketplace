@@ -1,6 +1,8 @@
-﻿namespace Marketplace.Domain
+﻿using Marketplace.Framework;
+
+namespace Marketplace.Domain
 {
-    public class ClassifiedAdId : IEquatable<ClassifiedAdId>
+    public class ClassifiedAdId : Value<ClassifiedAdId>
     {
         private Guid Value { get; }
         public ClassifiedAdId(Guid value)

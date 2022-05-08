@@ -1,8 +1,16 @@
-using Swashbuckle.Swagger;
+using Marketplace.Api;
+using Marketplace.Contracts;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+//builder.Services.AddSingleton(new ClassifiedAdsCommandsApi());
+builder.Services.AddSingleton<IEntityStore, RavenDbEntityStore>();
+builder.Services.AddScoped<IHandleCommand<ClassifiedAds.V1.Create>,CreateClassifiedAdHandler>();
+builder.Services.AddScoped<IHandleCommand<ClassifiedAds.V1.Create>>(c =>
+    new RetryingCommandHandler<ClassifiedAds.V1.Create>(
+        new CreateClassifiedAdHandler(c.GetService<RavenDbEntityStore>())));
+
 builder.Services.AddControllers();
 builder.Services.AddMvc();
 builder.Services.AddSwaggerGen(c =>
