@@ -1,15 +1,28 @@
+using Marketplace;
 using Marketplace.Api;
-using Marketplace.Contracts;
+using Marketplace.Domain;
+using Marketplace.Framework;
+using Marketplace.Infrastructure;
+using MarketPlace.Infrastructure;
+using Raven.Client.Documents;
 
 var builder = WebApplication.CreateBuilder(args);
+var store = new DocumentStore
+{
+    Urls = new[] { "http://localhost:8080" },
+    Database = "Marketplace_Chapter8",
+    Conventions =
+        {
+            FindIdentityProperty = m => m.Name == "_databaseId"
+        }
+};
+store.Initialize();
 
-// Add services to the container.
-//builder.Services.AddSingleton(new ClassifiedAdsCommandsApi());
-builder.Services.AddSingleton<IEntityStore, RavenDbEntityStore>();
-builder.Services.AddScoped<IHandleCommand<ClassifiedAds.V1.Create>,CreateClassifiedAdHandler>();
-builder.Services.AddScoped<IHandleCommand<ClassifiedAds.V1.Create>>(c =>
-    new RetryingCommandHandler<ClassifiedAds.V1.Create>(
-        new CreateClassifiedAdHandler(c.GetService<RavenDbEntityStore>())));
+builder.Services.AddSingleton<ICurrencyLookup, FixedCurrencyLookup>();
+builder.Services.AddScoped(c => store.OpenAsyncSession());
+builder.Services.AddScoped<IUnitOfWork, RavenDbUnitOfWork>();
+builder.Services.AddScoped<IClassifiedAdRepository, ClassifiedAdRepository>();
+builder.Services.AddScoped<ClassifiedAdsApplicationService>();
 
 builder.Services.AddControllers();
 builder.Services.AddMvc();

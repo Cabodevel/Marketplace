@@ -4,26 +4,26 @@ using static Marketplace.Contracts.ClassifiedAds;
 
 namespace Marketplace.Api
 {
-    public class ClassifiedAdsApplicationService
-        : IApplicationService
+    public class ClassifiedAdsApplicationService : IApplicationService
     {
         private readonly IClassifiedAdRepository _repository;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly ICurrencyLookup _currencyLookup;
 
         public ClassifiedAdsApplicationService(
-            IClassifiedAdRepository repository,
+            IClassifiedAdRepository repository, IUnitOfWork unitOfWork,
             ICurrencyLookup currencyLookup
         )
         {
             _repository = repository;
+            _unitOfWork = unitOfWork;
             _currencyLookup = currencyLookup;
         }
 
         public Task Handle(object command) =>
             command switch
             {
-                V1.Create cmd =>
-                    HandleCreate(cmd),
+                V1.Create cmd => HandleCreate(cmd),
                 V1.SetTitle cmd =>
                     HandleUpdate(
                         cmd.Id,
@@ -43,8 +43,7 @@ namespace Marketplace.Api
                         cmd.Id,
                         c => c.UpdatePrice(
                             Price.FromDecimal(
-                                cmd.Price,
-                                cmd.Currency,
+                                cmd.Price, cmd.Currency,
                                 _currencyLookup
                             )
                         )
@@ -53,8 +52,7 @@ namespace Marketplace.Api
                     HandleUpdate(
                         cmd.Id,
                         c => c.RequestToPublish()
-                    ),
-                _ => Task.CompletedTask
+                    )
             };
 
         private async Task HandleCreate(V1.Create cmd)
@@ -68,25 +66,23 @@ namespace Marketplace.Api
                 new UserId(cmd.OwnerId)
             );
 
-            await _repository.Save(classifiedAd);
+            await _repository.Add(classifiedAd);
+            await _unitOfWork.Commit();
         }
 
         private async Task HandleUpdate(
-            Guid classifiedAdId,
-            Action<ClassifiedAd> operation
-        )
+            Guid classifiedAdId, Action<ClassifiedAd> operation)
         {
-            var classifiedAd = await _repository.Load(
-                classifiedAdId.ToString()
-            );
+            var classifiedAd = await
+            _repository.Load(classifiedAdId.ToString());
             if (classifiedAd == null)
                 throw new InvalidOperationException(
-                    $"Entity with id {classifiedAdId} cannot be found"
-                );
+                    $"Entity with id {classifiedAdId} cannot be 
+                    found");
 
             operation(classifiedAd);
 
-            await _repository.Save(classifiedAd);
+            await _unitOfWork.Commit();
         }
     }
 }
