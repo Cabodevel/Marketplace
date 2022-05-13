@@ -1,6 +1,4 @@
-﻿using System.Threading.Tasks;
-using Marketplace.Contracts;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Serilog;
 using static Marketplace.Contracts.ClassifiedAds;
 
@@ -59,8 +57,7 @@ namespace Marketplace.Api
         {
             try
             {
-                Log.Debug("Handling HTTP request of type {type}",
-                typeof(T).Name);
+                Log.Debug("Handling HTTP request of type {type}", typeof(T).Name);
                 await handler(request);
                 return Ok();
             }

@@ -11,7 +11,8 @@ namespace Marketplace.Api
         private readonly ICurrencyLookup _currencyLookup;
 
         public ClassifiedAdsApplicationService(
-            IClassifiedAdRepository repository, IUnitOfWork unitOfWork,
+            IClassifiedAdRepository repository,
+            IUnitOfWork unitOfWork,
             ICurrencyLookup currencyLookup
         )
         {
@@ -70,15 +71,12 @@ namespace Marketplace.Api
             await _unitOfWork.Commit();
         }
 
-        private async Task HandleUpdate(
-            Guid classifiedAdId, Action<ClassifiedAd> operation)
+        private async Task HandleUpdate(Guid classifiedAdId, Action<ClassifiedAd> operation)
         {
             var classifiedAd = await
             _repository.Load(classifiedAdId.ToString());
             if (classifiedAd == null)
-                throw new InvalidOperationException(
-                    $"Entity with id {classifiedAdId} cannot be 
-                    found");
+                throw new InvalidOperationException( $"Entity with id {classifiedAdId} cannot be found");
 
             operation(classifiedAd);
 
